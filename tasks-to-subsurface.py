@@ -39,10 +39,12 @@ dive_data = data['items'][3]['items']
 #for item in dive_data:
     #processed_dives.append(Dive(item))
 
+
 def rejoin(string_list):
     for i in range(2, len(string_list)):
         string_list[1] = string_list[1] + ' ' + string_list[i]
     return string_list
+
 # TODO: operation notes here, move into class
 current_dive = dive_data[0]
 dive_notes = current_dive['notes']
@@ -52,6 +54,8 @@ dive_notes = dive_notes.replace("Exposure protection:", "Suit:")
 dive_notes = dive_notes.replace("Conditions:", "Tags:")
 dive_notes = dive_notes.replace("Comments:", "Notes:")
 split_dive = dive_notes.split('\n')
+
+
 properties = {}
 
 # fix headers
@@ -67,14 +71,20 @@ remove_chars = '+'
 for item in split_dive:
     item = item.replace('+', '')
     split_items = ' '.join(item.split()).split(' ')
-    if 'ime' in split_items[0]:
+    if 'Time' in split_items[0]:
         split_items[1] = split_items[1] + ' ' + split_items[2]
     #Location formatting
-    if 'ocation' in split_items[0]:
+    if 'Location' in split_items[0]:
         #for i in range(2, len(split_items)):
             #split_items[1] = split_items[1] + ' ' + split_items[i]
         split_items = rejoin(split_items)
     properties.update({split_items[0]: split_items[1]})
+    if "Avg" in split_items[0]:
+        split_items[0] = split_items[0] + ' ' + split_items[1]
+        split_items.pop(1)
+        x=1
+    if "Depth" in split_items[0] and "Avg" not in split_items[0]:
+
 location = current_dive['title']
 
 
