@@ -1,6 +1,5 @@
 import json
 import csv
-import datetime
 from dateutil import parser
 
 
@@ -129,8 +128,6 @@ class Dive:
                     self.notes, self.cyl_size, self.o2]
 
 
-
-
 with open('Tasks.json') as file:
     data = json.load(file)
 
@@ -169,75 +166,12 @@ def rejoin(string_list):
 
 
 headers = ['Dive #', 'Date', 'Time', 'Location', 'Max Depth', 'Avg Depth', 'Duration',
-           'Visibility', 'Water temps', 'Weight', 'Suit', 'Tags', 'Start Pressure',
+           'Visibility', 'Water temp', 'Weight', 'Suit', 'Tags', 'Start Pressure',
            'End Pressure', 'Notes', 'Cyl. size', 'O2']
 
 filename = 'divelog.csv'
 with open(filename, 'w', newline='\n') as csvfile:
     csvwriter = csv.writer(csvfile, delimiter='\t')
     csvwriter.writerow(headers)
-    #counter = 0
     for dive in processed_dives:
-        #if counter >= 50:
-            #break
         csvwriter.writerow(dive.row)
-        #counter += 1
-
-
-# convert visibility to between 0-5
-# strip + from visiblity
-
-
-# make dive object or list
-# sort dives by date and then by time
-# add dive number
-
-
-# if 'Time' in split_items[0]:
-# split_items[1] = split_items[1] + ' ' + split_items[2]
-# Location formatting
-# if 'Location' in split_items[0]:
-# for i in range(2, len(split_items)):
-# split_items[1] = split_items[1] + ' ' + split_items[i]
-# split_items = rejoin(split_items)
-# if "Avg" in split_items[0]:
-# split_items[0] = split_items[0] + ' ' + split_items[1]
-# split_items.pop(1)
-# x=1
-# if "Depth" in split_items[0] and "Avg" not in split_items[0]:
-# x=1
-
-
-'''
-# TODO: operation notes here, move into class
-current_dive = dive_data[0]
-dive_notes = current_dive['notes']
-dive_notes = dive_notes.replace("Bottom time:", "Duration:")
-dive_notes = dive_notes.replace("Temperature", "Water temp")
-dive_notes = dive_notes.replace("Exposure protection:", "Suit:")
-dive_notes = dive_notes.replace("Conditions:", "Tags:")
-dive_notes = dive_notes.replace("Comments:", "Notes:")
-split_dive = dive_notes.split('\n')
-
-properties = {}
-remove_chars = '+'
-for item in split_dive:
-    item = item.replace(remove_chars, '')
-    split_items = ' '.join(item.split()).split(': ')
-    if 'temp' in split_items[0]:
-        split_items[0] = split_items[0].replace('s', '')
-    properties.update({split_items[0]: split_items[1]})
-
-properties['Max Depth'] = properties.pop('Depth')
-properties['Location'] = current_dive['title'] + ', ' + properties['Location']
-properties['Time'] = properties['Time'].split(' ')[0] + ' ' + properties['Time'].split(' ')[1]
-properties['Avg Depth'] = properties['Avg Depth'].split(' ')[0]
-properties['Max Depth'] = properties['Max Depth'].split(' ')[0]
-properties['Duration'] = properties['Duration'].split(' ')[0]
-properties['Visibility'] = properties['Visibility'].split(' ')[0]
-properties['Water temp'] = properties['Water temp'].split(' ')[0]
-properties['Weight'] = properties['Weight'].split(' ')[0]
-properties['Start Pressure'] = properties['Air'].split(' ')[0]
-properties['End Pressure'] = properties['Air'].split(' ')[2]
-del properties['Air']
-'''
