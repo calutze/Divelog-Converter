@@ -1,5 +1,7 @@
 import json
 import csv
+import datetime
+from dateutil import parser
 
 
 class Dive:
@@ -62,21 +64,19 @@ class Dive:
         if properties.get('Time', False):
             if len(properties['Time'].split(' ')) > 1:
                 properties['Time'] = properties['Time'].split(' ')[0] + ' ' + properties['Time'].split(' ')[1]
-        if properties.get('Avg Depth', False) != False:
+        if properties.get('Avg Depth', False):
             properties['Avg Depth'] = properties['Avg Depth'].split(' ')[0]
-
-        if properties.get('Duration', False) != False:
+        if properties.get('Duration', False):
             properties['Duration'] = properties['Duration'].split(' ')[0]
-        if properties.get('Visibility', False) != False:
+        if properties.get('Visibility', False):
             properties['Visibility'] = properties['Visibility'].split(' ')[0]
-        if properties.get('Water temp', False) != False:
+        if properties.get('Water temp', False):
             properties['Water temp'] = properties['Water temp'].split(' ')[0]
-        if properties.get('Weight', False) != False:
+        if properties.get('Weight', False):
             properties['Weight'] = properties['Weight'].split(' ')[0]
-        if properties.get('Air', False) != False:
-            if properties.get('Start Pressure', False) != False:
+        if properties.get('Air', False):
+            if len(properties['Air'].split(' ')) > 2:
                 properties['Start Pressure'] = properties['Air'].split(' ')[0]
-            if properties.get('End Pressure', False) != False:
                 properties['End Pressure'] = properties['Air'].split(' ')[2]
             #del properties['Air']
 
@@ -91,10 +91,22 @@ class Dive:
             self.max_depth = properties['Max Depth']
         if properties.get('Avg Depth', False):
             self.avg_depth = properties['Avg Depth']
-        if properties.get('Avg Depth', False):
+        if properties.get('Duration', False):
             self.duration = properties['Duration']
         if properties.get('Visibility', False):
-            self.visibility = properties['Visibility']
+            if int(properties["Visibility"]) <= 10:
+                self.visibility = 1
+            elif 10 < int(properties["Visibility"]) <= 30:
+                self.visibility = 2
+            elif 30 < int(properties["Visibility"]) <= 60:
+                self.visibility = 3
+            elif 60 < int(properties["Visibility"]) <= 100:
+                self.visibility = 4
+            elif 100 < int(properties["Visibility"]):
+                self.visibility = 5
+            else:
+                self.visibility = 0
+            #self.visibility = properties['Visibility']
         if properties.get('Water temp', False):
             self.water_temp = properties['Water temp']
         if properties.get('Weight', False):
@@ -110,16 +122,19 @@ class Dive:
         if properties.get('Notes', False):
             self.notes = properties['Notes']
 
+    def generate_row(self):
         self.row = [self.dive_num, self.date, self.time, self.location, self.max_depth,
                     self.avg_depth, self.duration, self.visibility, self.water_temp,
                     self.weight, self.suit, self.tags, self.start_pressure, self.end_pressure,
                     self.notes, self.cyl_size, self.o2]
 
 
+
+
 with open('Tasks.json') as file:
     data = json.load(file)
 
-dive_data = data['items'][3]['items']
+dive_data = data['items'][0]['items']
 processed_dives = []
 counter = 0
 for item in dive_data:
@@ -128,6 +143,23 @@ for item in dive_data:
 for item in dive_data:
     if item['status'] != 'completed':
         processed_dives.append(Dive(item))
+
+
+def sort_func(item):
+    if item.date != '':
+        date_obj = parser.parse(item.date)
+        return date_obj
+    else:
+        return parser.parse("01/01/1990")
+
+
+processed_dives.sort(key=sort_func, reverse=True)
+
+counter = 5
+for i in range(len(processed_dives)-1,0, -1):
+    counter += 1
+    processed_dives[i].dive_num = counter
+    processed_dives[i].generate_row()
 
 
 def rejoin(string_list):
@@ -141,12 +173,15 @@ headers = ['Dive #', 'Date', 'Time', 'Location', 'Max Depth', 'Avg Depth', 'Dura
            'End Pressure', 'Notes', 'Cyl. size', 'O2']
 
 filename = 'divelog.csv'
-with open(filename, 'w') as csvfile:
-    csvwriter = csv.writer(csvfile)
+with open(filename, 'w', newline='\n') as csvfile:
+    csvwriter = csv.writer(csvfile, delimiter='\t')
     csvwriter.writerow(headers)
+    #counter = 0
     for dive in processed_dives:
+        #if counter >= 50:
+            #break
         csvwriter.writerow(dive.row)
-
+        #counter += 1
 
 
 # convert visibility to between 0-5
